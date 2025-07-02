@@ -85,15 +85,12 @@ def ask_gemini(prompt):
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt)
-        st.write("Gemini raw response:", response)
-        if hasattr(response, 'text') and response.text:
-            return response.text
-        if hasattr(response, 'candidates') and response.candidates:
-            for c in response.candidates:
-                if hasattr(c, 'content') and hasattr(c.content, 'parts'):
-                    for part in c.content.parts:
-                        if hasattr(part, 'text'):
-                            return part.text
+        if hasattr(response, 'result'):
+            candidates = getattr(response.result, 'candidates', [])
+            if candidates and hasattr(candidates[0], 'content'):
+                parts = getattr(candidates[0].content, 'parts', [])
+                if parts and hasattr(parts[0], 'text'):
+                    return parts[0].text
         return "No AI response received."
     except Exception as e:
         st.error(f"Gemini Error: {e}")
