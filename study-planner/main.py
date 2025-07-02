@@ -85,9 +85,19 @@ def ask_gemini(prompt):
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt)
-        return response.text
+        st.write("Gemini raw response:", response)
+        if hasattr(response, 'text') and response.text:
+            return response.text
+        if hasattr(response, 'candidates') and response.candidates:
+            for c in response.candidates:
+                if hasattr(c, 'content') and hasattr(c.content, 'parts'):
+                    for part in c.content.parts:
+                        if hasattr(part, 'text'):
+                            return part.text
+        return "No AI response received."
     except Exception as e:
-        return f"Error: {e}"
+        st.error(f"Gemini Error: {e}")
+        return "Error: Could not get AI response."
 
 # --- Resource Suggestions ---
 subject_resources = {
