@@ -2,9 +2,9 @@ import streamlit as st
 import random
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
 from datetime import datetime
 import pandas as pd
+import google.generativeai as genai
 
 st.set_page_config(page_title="StudyMate.ai", page_icon="🎓", layout="wide")
 
@@ -61,11 +61,7 @@ st.markdown('''
 
 load_dotenv()
 gemini_api_key = os.getenv("GEMINI_API_KEY")
-
-client = OpenAI(
-    api_key=gemini_api_key,
-    base_url="https://generativelanguage.googleapis.com/v1beta"
-)
+genai.configure(api_key=gemini_api_key)
 
 # --- Motivational Quotes ---
 quotes = [
@@ -87,14 +83,9 @@ def generate_study_plan(subjects, hours, days):
 # --- Ask Gemini Agent ---
 def ask_gemini(prompt):
     try:
-        completion = client.chat.completions.create(
-            model="gemini-2.0-flash",
-            messages=[
-                {"role": "system", "content": "You are an AI Study Planner Assistant."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        return completion.choices[0].message.content.strip()
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        response = model.generate_content(prompt)
+        return response.text
     except Exception as e:
         return f"Error: {e}"
 
