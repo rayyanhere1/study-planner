@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 import pandas as pd
 import google.generativeai as genai
+import re
 
 st.set_page_config(page_title="StudyMate.ai", page_icon="🎓", layout="wide")
 
@@ -85,15 +86,11 @@ def ask_gemini(prompt):
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt)
-        st.write("RAW:", response)
-        st.write("DIR:", dir(response))
-        st.write("DICT:", response.__dict__ if hasattr(response, '__dict__') else str(response))
-        if hasattr(response, 'result'):
-            candidates = getattr(response.result, 'candidates', [])
-            if candidates and hasattr(candidates[0], 'content'):
-                parts = getattr(candidates[0].content, 'parts', [])
-                if parts and hasattr(parts[0], 'text'):
-                    return parts[0].text
+        result_str = getattr(response, "_result", "")
+        match = re.search(r'text: "(.*?)"', result_str, re.DOTALL)
+        if match:
+            text = match.group(1).replace('\\n', '\n')
+            return text
         return "No AI response received."
     except Exception as e:
         st.error(f"Gemini Error: {e}")
