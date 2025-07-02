@@ -85,6 +85,9 @@ def ask_gemini(prompt):
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt)
+        st.write("RAW:", response)
+        st.write("DIR:", dir(response))
+        st.write("DICT:", response.__dict__ if hasattr(response, '__dict__') else str(response))
         if hasattr(response, 'result'):
             candidates = getattr(response.result, 'candidates', [])
             if candidates and hasattr(candidates[0], 'content'):
