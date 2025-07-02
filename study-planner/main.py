@@ -86,7 +86,7 @@ def ask_gemini(prompt):
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt)
-        result_str = getattr(response, "_result", "")
+        result_str = str(getattr(response, "_result", ""))
         match = re.search(r'text: "(.*?)"', result_str, re.DOTALL)
         if match:
             text = match.group(1).replace('\\n', '\n')
