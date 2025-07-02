@@ -86,12 +86,16 @@ def ask_gemini(prompt):
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt)
-        result_str = str(getattr(response, "_result", ""))
-        match = re.search(r'text: "(.*?)"', result_str, re.DOTALL)
-        if match:
-            text = match.group(1).replace('\\n', '\n')
-            return text
-        return "No AI response received."
+        
+        if hasattr(response, 'text') and response.text:
+            return response.text
+        
+        if hasattr(response, 'candidates') and response.candidates:
+            parts = response.candidates[0].content.parts
+            if parts and hasattr(parts[0], 'text'):
+                return parts[0].text
+    
+        return str(response)
     except Exception as e:
         st.error(f"Gemini Error: {e}")
         return "Error: Could not get AI response."
